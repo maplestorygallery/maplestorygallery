@@ -1,0 +1,131 @@
+<!DOCTYPE HTML>
+<HTML>
+	<HEAD>
+		<style type="text/css">
+			*{
+				font-size:3vmin;
+				margin:0px;
+				padding:0px;
+				-webkit-box-sizing: border-box;
+				-moz-box-sizing: border-box;
+				box-sizing: border-box;
+				overflow: inherit;
+			}
+			html, body {
+				float: left;
+				height: 100%;
+				width: 100%;
+				overflow:hidden;
+				background-color:rgba(0,0,0,255);
+				color:rgb(255,255,255);
+				text-shadow: 0 0 1rem white;
+				position:absolute;
+				border-color:white;
+				text-align:center;
+			}
+			div{  border-color:white; box-shadow: 0 0 0 0.1rem white inset; border-radius: 0.5rem;  }
+			input{  color:rgb(255,255,255); background-color:transparent;  border-color:white; box-shadow: 0 0 0 0.1rem white inset; border-radius: 0.5rem; }
+			.bg{ width: 100%; height: 100%;  }
+				.bd{ width: 100%; height: 90%;  }
+					.br{float: left; width: 100%; height: 100%;  ;  text-align: left; overflow:scroll; }
+						#msg { list-style-type: none; overflow:hidden;  }
+						#msg li {overflow:hidden; }
+						#msg li:nth-child(odd) {overflow:hidden;   }
+				.bm{ height: 20%; }
+					.dn{ height:50%; }
+	  				#uld{ float: left; width:20%; height:100%; padding:0.2rem; }
+						#dld{float: left; width:60%; height:100%; padding:0.2rem; }
+						.dr{float: left; width:10%; height:100%; padding:0.2rem; }
+						.hr{ float: left; width: 10%; height: 100%; padding:0.2rem; }
+		</style>
+	</HEAD>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<BODY onload="init()">
+		<div class="bg">
+		</div>
+		<script src="http://cdn.socket.io/socket.io-1.2.0.js"></script>
+		<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+		<script>
+			var socket = io();
+			var category="chat";
+ 			function init(){
+				maplestorygallery.init();
+				maplestorygallery.event.init();
+				inits.chat();
+			}
+			function dn(){
+				if(event.keyCode == 13)
+					push.dn();
+			}
+
+			var maplestorygallery;
+			maplestorygallery = {
+				init: function () {
+					$('<div class="bd"></div>').appendTo($('.bg'));
+						$('<div class="br" id="msgbox"></div>').appendTo($('.bd'));
+							$('<ul id="msg"></ul>').appendTo($('.br'));
+					$('<div class="bm"/>').appendTo($('.bg'));
+						$('<div class="dn"/>').appendTo($('.bm'));
+							$('<input id="uld" onKeyDown="up()"/>').appendTo($('.dn'));
+							$('<input id="dld" onKeyDown="dn()"/>').appendTo($('.dn'));
+							$('<div class="dr"/>').appendTo($('.dn'));
+							$('<div class="hr">삭제</div>').appendTo($('.dn'));
+				}
+			};
+			maplestorygallery.event={
+				init: function(){
+					var dr = $('.dr');
+					$(dr).bind('click',function(){
+						maplestorygallery.event.onClick(dr);
+					});
+					var hr = $('.hr');
+					$(hr).bind('click',function(){
+						maplestorygallery.event.onClick(hr);
+					});
+				},
+				onClick:function(o){
+					if($(o).hasClass('hd')){}
+					if($(o).hasClass('hr')){
+						$('#msg').empty();
+					}
+					if($(o).hasClass('dr')){
+						push.dn();
+					}
+				}
+			};
+			var uld=$('.uld');
+			var dld=$('.dld');
+			var dr=$('.dr');
+			var push;
+			var inits;
+			inits={
+				chat: function(){
+					$('#uld').val(localStorage.getItem('대화명')||"대화명");
+					$('#dld').val("메시지");
+					$('.dr').text("전송");
+					category="chat";
+				}
+			};
+			push={
+				dn:function(){
+					var ulc=document.getElementById('uld').value;
+					var dlc=document.getElementById('dld').value;
+					switch(category){
+						case 'chat': 
+							if(ulc.length && dlc.length)
+								socket.emit('message',[ulc,dlc]);
+								document.getElementById('dld').value = "";
+								localStorage.setItem('대화명',document.getElementById('uld').value);
+							break;
+					}
+				}
+			};
+			socket.on('message', function(msg){
+				$('#msg').append($('<li>').text(msg[0]+' : '+msg[1]));
+				document.getElementById("msg").scrollTop = document.getElementById("msg").scrollHeight;
+				document.getElementById("msgbox").scrollTop = document.getElementById("msgbox").scrollHeight;
+				document.getElementById("msgbox").scrollTop = document.getElementById("msg").scrollHeight;
+			});
+		</script>
+	</BODY>
+</HTML>
